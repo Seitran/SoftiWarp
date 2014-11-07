@@ -1,0 +1,37 @@
+		 Open Fabrics Enterprise Distribution (OFED)
+			    ib_srp Release Notes
+				   May 2014
+
+========
+Overview
+========
+
+The ib_srp kernel driver is a SCSI low-level initiator driver (LLD). This
+means that this kernel driver makes communication via the SCSI protocol with
+an SRP target system possible. The version of the SRP initiator included in
+OFED 3.12 is derived from the upstream v3.12 Linux kernel SRP initiator driver
+and has been ported to RHEL 6 and SLES 11. Lockless operation is enabled in
+combination with RHEL 6.2 and later, with SLES 11 and also with upstream
+kernel v2.6.37 and later but not with RHEL 6.0 nor with RHEL 6.1. For more
+information about lockless dispatching of SCSI commands, see also the RHEL 6.2
+release notes
+(https://access.redhat.com/site/documentation/en-US/Red_Hat_Enterprise_Linux/6/html-single/6.2_Release_Notes/).
+
+
+=========
+Changelog
+=========
+
+OFED 3.12
+.........
+
+- A new sysfs attribute has been added that allows to disconnect the
+  initiator from a target port (/sys/class/srp_remote_ports/${port}/delete).
+- Robustness of the driver with regard to cable pulling has been improved.
+
+
+OFED 3.5
+........
+
+The SRP initiator driver in OFED 3.5 was based on the ib_srp driver in the
+upstream Linux 3.5 kernel.

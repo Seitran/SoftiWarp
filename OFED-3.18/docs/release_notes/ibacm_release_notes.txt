@@ -1,0 +1,115 @@
+	     Open Fabrics Enterprise Distribution (OFED)
+		    IB ACM in OFED 3.12 Release Notes
+			  
+			   May 2014
+
+
+===============================================================================
+Table of Contents
+===============================================================================
+1. Overview
+2. Operation Details
+3. Known Issues
+
+===============================================================================
+1. Overview
+===============================================================================
+This describes ibacm release 1.0.8.
+
+The IB ACM package implements and provides a framework for name,
+address, and route resolution services over InfiniBand.  It is intended to
+address connection setup scalability issues running MPI applications on
+large clusters.  The IB ACM provides information needed to establish a
+connection, but does not implement the CM protocol.
+
+When available, the IB ACM service is automatically used by the librdmacm
+library.
+
+The IB ACM is focused on being scalable and efficient.  The current
+implementation limits network traffic, SA interactions, and centralized
+services.  ACM supports multiple resolution protocols in order to handle
+different fabric topologies.
+
+The IB ACM package is comprised of two components: the ibacm service
+and a test/configuration utility - ib_acme.
+
+===============================================================================
+2.  Operation Details
+===============================================================================
+
+ib_acme:
+The ib_acme program serves a dual role.  It acts as a utility to test
+ibacm operation and help verify if the ibacm service and selected
+protocol is usable for a given cluster configuration.   Additionally,
+it automatically generates ibacm configuration files to assist with
+or eliminate manual setup.
+
+
+acm configuration files:
+The ibacm service relies on two configuration files.
+
+The ibacm_addr.cfg file contains name and address mappings for each IB
+<device, port, pkey> endpoint.  Although the names in the ibacm_addr.cfg
+file can be anything, ib_acme maps the host name and IP addresses to
+the IB endpoints.
+
+The ibacm_opts.cfg file provides a set of configurable options for the
+ib_acm service, such as timeout, number of retries, logging level, etc.
+ib_acme generates the ibacm_opts.cfg file using static information.  If
+an ibacm_opts.cfg files is not available, internal default values are
+used by the ibacm service.
+
+
+ibacm:
+The ib_acm service is responsible for resolving names and addresses to
+InfiniBand path information and caching such data.
+
+The ibacm implements a client interface over TCP sockets, which is
+abstracted by the librdmacm library.  One or more back-end protocols are
+used by the ibacm service to satisfy user requests.
+
+Conceptually, the ibacm service implements an ARP like protocol and either
+uses IB multicast records to construct path record data or queries the
+SA directly, depending on the selected route protocol.  By default, the
+ibacm services uses and caches SA path record queries.
+
+Specifically, all IB endpoints join a number of multicast groups.
+Multicast groups differ based on rates, mtu, sl, etc., and are prioritized.
+All participating endpoints must be able to communicate on the lowest
+priority multicast group.  The ibacm assigns one or more names/addresses
+to each IB endpoint using the ibacm_addr.cfg file.  Clients provide source
+and destination names or addresses as input to the service, and receive
+as output path record data.
+
+The service maps a client's source name/address to a local IB endpoint.
+If a client does not provide a source address, then the ib_acm service
+will select one based on the destination and local routing tables.  If the
+destination name/address is not cached locally, it sends a multicast
+request out on the lowest priority multicast group on the local endpoint.
+The request carries a list of multicast groups that the sender can use.
+The recipient of the request selects the highest priority multicast group
+that it can use as well and returns that information directly to the sender.
+The request data is cached by all endpoints that receive the multicast
+request message.  The source endpoint also caches the response and uses
+the multicast group that was selected to construct or obtain path record
+data, which is returned to the client.
+
+===============================================================================
+3. Known Issues
+===============================================================================
+
+The current implementation of the IB ACM has several restrictions:
+- The ibacm is limited in its handling of dynamic changes;
+  the ibacm must be stopped and restarted if a cluster is reconfigured.
+- The ibacm service reads address data from an ibacm_addr.cfg file.  If not
+  found, this file will automatically be generated.  Once created, ibacm
+  will use the address stored in this file for its mapping purposes.
+  When dynamic IP addresses is used, or IP addresses change, the result
+  is that ibacm will use stale data.  The current work-around is to
+  delete the ibacm_addr.cfg file before starting the ibacm daemon.  This
+  problem will be addressed in the 1.0.9 release, and is available in
+  upstream source tree.
+- The number of addresses that can be assigned to a single endpoint is
+  limited to 4.
+- The number of multicast groups that an endpoint can support is limited to 2.
+

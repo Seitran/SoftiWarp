@@ -1,0 +1,81 @@
+	     Open Fabrics Enterprise Distribution (OFED)
+		    RDMA CM in OFED 3.12 Release Notes
+			  
+			   May 2014
+
+
+===============================================================================
+Table of Contents
+===============================================================================
+1. Overview
+2. New Features
+3. Known Issues
+
+===============================================================================
+1. Overview
+===============================================================================
+The RDMA CM is a communication manager used to setup reliable, connected
+and unreliable datagram data transfers.  It provides an RDMA transport
+neutral interface for establishing connections.  The API concepts are
+based on sockets, but adapted for queue pair (QP) based semantics:
+communication must be over a specific RDMA device, and data transfers
+are message based.
+
+The RDMA CM can control both the QP and communication management (connection setup /
+teardown) portions of an RDMA API, or only the communication management
+piece.  It works in conjunction with the verbs
+API defined by the libibverbs library.  The libibverbs library provides the
+underlying interfaces needed to send and receive data.
+
+The RDMA CM can operate asynchronously or synchronously.  The mode of
+operation is controlled by the user.
+
+The RDMA CM also provides the rsocket implementation.
+Rsockets is a protocol over RDMA that supports a socket-level API
+for applications.  Rsocket APIs are intended to match the behavior
+of corresponding socket calls.  A preload library is included as part of
+the RDMA CM package, which allows many socket based applications to run
+unmodified over rsockets.
+
+===============================================================================
+2. New Features
+===============================================================================
+for OFED 3.12
+
+Enhancements to the librdmacm release 1.0.18, versus the 1.0.17 release,
+mostly centered around improvements to the rsocket protocol and implementation.
+Specific enhancements to rsockets included:
+
+* Now supports iWarp devices.
+
+* Support native IB addressing with SOCK_STREAM.
+
+* Provide the ability for an application to manually set Infiniband path
+  record data.  This allows applications using rsockets to take advantage
+  of ibacm, a package which tries to address IB subnet scalability issues.
+
+* Add keepalive support for SOCK_STREAM.
+
+In addition to the rsocket enhancements, several bug fixes were incorporated,
+along with a new test program, cmtime, to measure connection establishment times.
+
+===============================================================================
+3. Known Issues
+===============================================================================
+The RDMA CM relies on the operating system's network configuration tables to
+map IP addresses to RDMA devices.  Incorrectly configured network
+configurations can result in the RDMA CM being unable to locate the correct
+RDMA device.
+
+If you experience problems using the RDMA CM, you may want to check the
+following:
+
+   * Verify that you have IP connectivity over the RDMA devices.  For example,
+     ping between iWarp or IPoIB devices.
+
+   * Ensure that IP network addresses assigned to RDMA devices do not
+     overlap with IP network addresses assigned to standard Ethernet devices.
+
+   * For multicast issues, either bind directly to a specific RDMA device, or
+     configure the IP routing tables to route multicast traffic over an RDMA
+     device's IP address.

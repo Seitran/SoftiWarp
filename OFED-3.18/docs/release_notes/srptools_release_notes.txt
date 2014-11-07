@@ -1,0 +1,72 @@
+		 Open Fabrics Enterprise Distribution (OFED)
+			    srptools Release Notes
+				   May 2014
+
+========
+Overview
+========
+
+The srptools package contains tools for discovering SRP target ports in an
+InfiniBand network. The best known software component in this package is
+srp_daemon, a process that runs in the background, periodically scans a fabric
+for SRP target ports and makes the SRP initiator kernel driver (ib_srp) log in
+to the SRP target ports enabled in the srp_daemon.conf configuration file.
+
+
+=========
+Changelog
+=========
+
+Version 1.0.2 (February 20, 2014)
+.................................
+
+- Added support for specifying tl_retry_count in srp_daemon.conf. Changed
+  default behavior for tl_retry_timeout parameter from setting it to 2 into
+  leaving it at its default value (7). This makes srp_daemon again compatible
+  with the SRP initiator driver from kernel 3.12 and before.
+
+Version 1.0.1 (February 4, 2014)
+................................
+
+- Make process uniqueness check work.
+- Unsubscribe from subnet manager for traps before exiting.
+- Added support for the comp_vector and queue_size configuration file options.
+
+Version 1.0.0 (October 1, 2012)
+...............................
+
+- srp_daemon keeps working even if the LID changes of the port it is using to
+  scan the fabric or if a P_Key change occurs.
+- Added P_Key support to srp_daemon and ibsrpdm.
+- Fixed month in srp_daemon.log (OFED bug #2281). srp_daemon now uses syslog
+  and logrotate for logging.
+- srp_daemon is now only started for InfiniBand ports. It is no longer
+  attempted to start srp_daemon on Ethernet ports.
+- Added support for specifying the tl_retry_count parameter. By default use
+  tl_retry_count=2.
+- Allow srp_daemon to be started without configuration file.
+- Fixed a memory leak in srp_daemon that was triggered once during every fabric
+  rescan.
+- Reduced memory consumption of the srp_daemon process.
+- MAD transaction ID 0 is skipped after 2**32 rescans.
+- Installation: SRPHA_ENABLE=no / SRP_DAEMON_ENABLE=no is only added to
+  /etc/infiniband/openibd.conf if these variables did not yet exist in that
+  file.
+- Changed range of the srp_daemon and ibsrpdm exit codes from 0..127 into 0..1.
+- Changed ibsrpdm such that it uses the new umad P_Key ABI. Running ibsrpdm
+  does no longer cause a warning to be logged ("user_mad: process ibsrpdm did
+  not enable P_Key index support / user_mad:
+  Documentation/infiniband/user_mad.txt has info on the new ABI").
+- Fixed spelling of several help texts and diagnostic messages.
+
+Version 0.0.4 (August 30, 2009)
+...............................
+
+This is the version that was included in previous OFED versions, e.g. OFED 3.5.
+
+
+===========
+Source Code
+===========
+
+See also https://www.openfabrics.org/downloads/srptools/.

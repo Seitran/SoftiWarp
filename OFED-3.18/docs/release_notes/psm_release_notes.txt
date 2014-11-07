@@ -1,0 +1,72 @@
+              Open Fabrics Enterprise Distribution (OFED)
+                    PSM in OFED 3.12 Release Notes
+
+                          May 2014
+
+======================================================================
+1. Overview
+======================================================================
+
+The Performance Scaled Messaging (PSM) API is Intel's low-level user-level
+communications interface for the Intel(R) True Scale Fabric family of products.
+
+The PSM libraries are included in the infinipath-psm-3.2-2_ga8c3e3e_open.src.rpm
+source RPM and get built and installed as part of a default OFED
+install process.
+
+The primary way to use PSM is by compiling applications with an MPI that has
+been built to use the PSM layer as its interface to Intel HCAs.
+PSM is the high-performance interface to the Intel(R) True Scale HCAs.
+
+Minimal instructions* for building two MPIs tested with OFED 
+with PSM support are as follows:
+
+
+Open MPI:
+
+- Download a recent Open MPI tar ball from 
+   http://www.open-mpi.org/software/ompi/v1.8/ .
+  Version 1.8.1 has been tested with PSM from this OFED release.
+- Untar the file and cd to the Open MPI directory.  Then
+  ./configure --with-psm --prefix=<install directory>
+  make
+  make install
+
+MVAPICH2:
+
+- Download a recent MVAPICH2 tar ball from
+   http://mvapich.cse.ohio-state.edu/download/mvapich2/
+  Version 1.9 has been tested with PSM from this OFED release.
+- Untar the file and go to the mvapich2-1.x directory
+- Execute the configure and make commands as follows:
+  ./configure --prefix=<install directory> --with-device=ch3:psm \
+   --enable-shared
+  make
+  make install
+
+Once these MPIs are built, using mpirun/mpiexec will result in the use
+of PSM by default -- no additional options needed.  Also if you have two 
+Intel True Scale HCAs per node, both of them will be used by default 
+when you run with 2 or more ranks per node.  No option is necessary on 
+the mpirun/mpiexec command.
+
+If you want to use just one of the HCAs, set the IPATH_UNIT variable to:
+export IPATH_UNIT=0   (or =1)
+If you have two Intel True Scale HCAs per node, and want to get additional 
+bandwidth performance even when only one MPI rank is active per node, set:
+export PSM_MULTIRAIL=0
+For most applications, it is better not to use this PSM_MULTIRAIL variable 
+since it increases MPI latency somewhat, but it is helpful for a minority 
+of applications that require additional bandwidth from single ranks.
+
+
+* To configure with a different compiler suite than the native GCC suite on your
+  Linux machine, set the configure or script variables: CC, CXX, F77, F90 to be
+  assigned to the appropriate compiler names for your suite, such as for the 
+  Intel Compiler suite:
+  CC=icc
+  CXX=icpc
+  F77=ifort
+  F90=ifort
+
+
